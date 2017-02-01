@@ -128,6 +128,8 @@ struct AssemblerInvocation {
 
   /// The name of the relocation model to use.
   std::string RelocationModel;
+  /// The name of the target ABI to use.
+  std::string ABIName;
 
   /// @}
 
@@ -248,6 +250,7 @@ bool AssemblerInvocation::CreateFromArgs(AssemblerInvocation &Opts,
   Opts.NoExecStack = Args.hasArg(OPT_mno_exec_stack);
   Opts.FatalWarnings = Args.hasArg(OPT_massembler_fatal_warnings);
   Opts.RelocationModel = Args.getLastArgValue(OPT_mrelocation_model, "pic");
+  Opts.ABIName = Args.getLastArgValue(OPT_target_abi);
 
   return Success;
 }
@@ -407,6 +410,7 @@ static bool ExecuteAssembler(AssemblerInvocation &Opts,
 
   // FIXME: init MCTargetOptions from sanitizer flags here.
   MCTargetOptions Options;
+  Options.ABIName = Opts.ABIName;
   std::unique_ptr<MCTargetAsmParser> TAP(
       TheTarget->createMCAsmParser(*STI, *Parser, *MCII, Options));
   if (!TAP)
