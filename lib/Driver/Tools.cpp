@@ -1013,6 +1013,7 @@ void mips::getMipsCPUAndABI(const ArgList &Args, const llvm::Triple &Triple,
                             StringRef &CPUName, StringRef &ABIName) {
   const char *DefMips32CPU = "mips32r2";
   const char *DefMips64CPU = "mips64r2";
+  const char *CheriCPU = "cheri";
 
   // MIPS32r6 is the default for mips(el)?-img-linux-gnu and MIPS64r6 is the
   // default for mips64(el)?-img-linux-gnu.
@@ -1020,6 +1021,10 @@ void mips::getMipsCPUAndABI(const ArgList &Args, const llvm::Triple &Triple,
       Triple.getEnvironment() == llvm::Triple::GNU) {
     DefMips32CPU = "mips32r6";
     DefMips64CPU = "mips64r6";
+  }
+  if (Triple.getArch() == llvm::Triple::cheri) {
+    DefMips32CPU = CheriCPU;
+    DefMips64CPU = CheriCPU;
   }
 
   // MIPS64r6 is the default for Android MIPS64 (mips64el-linux-android).
@@ -1077,8 +1082,15 @@ void mips::getMipsCPUAndABI(const ArgList &Args, const llvm::Triple &Triple,
     CPUName = llvm::StringSwitch<const char *>(ABIName)
                   .Cases("o32", "eabi", DefMips32CPU)
                   .Cases("n32", "n64", DefMips64CPU)
+                  .Case("sandbox", CheriCPU)
                   .Default("");
   }
+
+  // change CPU from cheri to cheri128 if -mllvm -cheri128 was passed
+  if (CPUName == CheriCPU)
+    for (const Arg *A : Args.filtered(options::OPT_mllvm))
+        if (StringRef(A->getValue(0)) == "-cheri128")
+          CPUName = "cheri128";
 
   // FIXME: Warn on inconsistent use of -march and -mabi.
 }
@@ -1594,7 +1606,8 @@ static std::string getCPUName(const ArgList &Args, const llvm::Triple &T,
   case llvm::Triple::mips:
   case llvm::Triple::mipsel:
   case llvm::Triple::mips64:
-  case llvm::Triple::mips64el: {
+  case llvm::Triple::mips64el:
+  case llvm::Triple::cheri: {
     StringRef CPUName;
     StringRef ABIName;
     mips::getMipsCPUAndABI(Args, T, CPUName, ABIName);
