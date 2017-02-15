@@ -1157,6 +1157,9 @@ static void getMIPSTargetFeatures(const Driver &D, const llvm::Triple &Triple,
   StringRef ABIName;
   mips::getMipsCPUAndABI(Args, Triple, CPUName, ABIName);
   ABIName = getGnuCompatibleMipsABIName(ABIName);
+  if (ABIName == "sandbox" && Triple.getArch() != llvm::Triple::cheri)
+    D.Diag(diag::err_drv_argument_not_allowed_with) << "-mabi=sandbox"
+      << Triple.str();
 
   AddTargetFeature(Args, Features, options::OPT_mno_abicalls,
                    options::OPT_mabicalls, "noabicalls");
