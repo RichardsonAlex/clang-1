@@ -7445,6 +7445,8 @@ class MipsTargetInfo : public TargetInfo {
   bool IsMicromips;
   bool IsNan2008;
   bool IsSingleFloat;
+  bool IsNoABICalls;
+  bool CanUseBSDABICalls;
   enum MipsFloatABI {
     HardFloat, SoftFloat
   } FloatABI;
@@ -7463,7 +7465,8 @@ protected:
 public:
   MipsTargetInfo(const llvm::Triple &Triple, const TargetOptions &)
       : TargetInfo(Triple), IsMips16(false), IsMicromips(false),
-        IsNan2008(false), IsSingleFloat(false), FloatABI(HardFloat),
+        IsNan2008(false), IsSingleFloat(false), IsNoABICalls(false),
+        CanUseBSDABICalls(false), FloatABI(HardFloat),
         DspRev(NoDSP), HasMSA(false), HasFP64(false),
         IsCheri(getTriple().getArch() == llvm::Triple::cheri), SandboxABI(false),
         CapSize(Cheri128 ? 128 : 256) {
@@ -7479,6 +7482,9 @@ public:
       CPU = Cheri128 ? "cheri128" : "cheri";
       SuitableAlign = CapSize;
     }
+    CanUseBSDABICalls = Triple.getOS() == llvm::Triple::FreeBSD ||
+                        Triple.getOS() == llvm::Triple::NetBSD ||
+                        Triple.getOS() == llvm::Triple::OpenBSD;
   }
 
   bool isNaN2008Default() const {
@@ -7674,6 +7680,12 @@ public:
       Builder.defineMacro("_MIPS_SIM", "_ABI64");
     } else
       llvm_unreachable("Invalid ABI.");
+
+    if (!IsNoABICalls) {
+      if (CanUseBSDABICalls)
+        Builder.defineMacro("__ABICALLS__");
+      Builder.defineMacro("__mips_abicalls");
+    }
 
     Builder.defineMacro("__REGISTER_PREFIX__", "");
 
@@ -7943,6 +7955,8 @@ public:
         IsCheri = true;
       else if (Feature == "-nan2008")
         IsNan2008 = false;
+      else if (Feature == "+noabicalls")
+        IsNoABICalls = true;
     }
 
     setDataLayout();
