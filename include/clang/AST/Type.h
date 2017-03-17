@@ -3896,6 +3896,7 @@ public:
     attr_objc_kindof,
     attr_objc_inert_unsafe_unretained,
     attr_memory_capability,
+    attr_memory_address,
   };
 
 private:

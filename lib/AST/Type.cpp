@@ -2023,7 +2023,6 @@ bool Type::isIncompleteType(NamedDecl **Def) const {
   }
 }
 
-
 bool QualType::isPODType(const ASTContext &Context) const {
   // C++11 has a more relaxed definition of POD.
   if (Context.getLangOpts().CPlusPlus11)
@@ -3027,6 +3026,7 @@ bool AttributedType::isQualifier() const {
   case AttributedType::attr_nullable:
   case AttributedType::attr_null_unspecified:
   case AttributedType::attr_memory_capability:
+  case AttributedType::attr_memory_address:
     return true;
 
   // These aren't qualifiers; they rewrite the modified type to be a
@@ -3097,6 +3097,7 @@ bool AttributedType::isCallingConv() const {
   case attr_nullable:
   case attr_null_unspecified:
   case attr_objc_kindof:
+  case attr_memory_address:
     return false;
 
   case attr_pcs:
