@@ -1756,9 +1756,11 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
         CGF, Src, SrcPointeeTy.getAddressSpace(),
         DstPointeeTy.getAddressSpace(), DestType);
   }
+  case CK_NoOp:
+    assert(E->getType() == DestTy && "Both types should be the same for NOOP cast");
+    LLVM_FALLTHROUGH;
   case CK_AtomicToNonAtomic:
   case CK_NonAtomicToAtomic:
-  case CK_NoOp:
   case CK_UserDefinedConversion:
     return Visit(const_cast<Expr*>(E));
 
