@@ -170,7 +170,7 @@ void CodeGenFunction::EmitCXXGlobalVarDeclInit(const VarDecl &D,
   // If all pointers are capabilities or the global is qualified with
   // __capability we have to use the getCHERICapabilityAS()
   bool IsCap = Context.getTargetInfo().areAllPointersCapabilities() ||
-               T->isMemoryCapabilityType(Context);
+               T->isCHERICapabilityType(Context);
   unsigned ExpectedAddrSpace =
       IsCap ? CGM.getTargetCodeGenInfo().getCHERICapabilityAS()
             : Context.getTargetAddressSpace(T.getQualifiers());

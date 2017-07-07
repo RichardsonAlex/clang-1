@@ -1323,7 +1323,7 @@ void CodeGenFunction::EmitAutoVarInit(const AutoVarEmission &emission) {
       BP = llvm::PointerType::getInt8PtrTy(getLLVMContext(), AS);
     }
     if (ContainsCapabilities)
-      AS = getTargetHooks().getMemoryCapabilityAS();
+      AS = getTargetHooks().getCHERICapabilityAS();
     llvm::GlobalVariable *GV =
       new llvm::GlobalVariable(CGM.getModule(), constant->getType(), true,
                                llvm::GlobalValue::PrivateLinkage,
